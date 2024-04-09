@@ -1,38 +1,17 @@
-import pyttsx3
+import torch
+from transformers import GPT2Tokenizer, GPT2LMHeadModel
 import speech_recognition as sr
-from chatbot import Chat, register_call
+import pyttsx3
 
-@register_call("name")
-def call_name(params):
-    return "I'm your AI girlfriend!"
-
-@register_call("age")
-def call_age(params):
-    return "I don't have an age. I'm just a virtual assistant."
-
-@register_call("love")
-def call_love(params):
-    return "Of course, I love you! 💖"
-
-@register_call("hobby")
-def call_hobby(params):
-    return "I enjoy chatting with you and learning new things!"
-
-@register_call("bye")
-def call_bye(params):
-    return "Goodbye! I'll be here whenever you need me. 😊"
-
-# Initialize pyttsx3 engine
-engine = pyttsx3.init()
-
-# Set Zira voice explicitly
-engine.setProperty('voice', 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-US_ZIRA_11.0')
+# Load pre-trained model and tokenizer
+tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+model = GPT2LMHeadModel.from_pretrained("Koriyy/DialoGPT-medium-gf")  # Replace with your fine-tuned model directory
 
 # Initialize SpeechRecognition recognizer
 recognizer = sr.Recognizer()
 
-# Create a chat instance
-chat = Chat()
+# Initialize pyttsx3 engine
+engine = pyttsx3.init()
 
 print("AI Girlfriend: Hi! I'm your virtual girlfriend. How can I help you today?")
 
@@ -48,14 +27,20 @@ while True:
         user_input = recognizer.recognize_google(audio)
         print("You:", user_input)
 
-        # Get response from chatbot
-        response = chat.respond(user_input)
-        print("AI Girlfriend:", response)
+        # Tokenize input
+        input_ids = tokenizer.encode(user_input, return_tensors="pt")
 
-        # Convert text response to speech
-        engine.say(response)
+        # Generate response
+        with torch.no_grad():
+            output = model.generate(input_ids, max_length=100, pad_token_id=tokenizer.eos_token_id, num_return_sequences=1)
+
+        # Decode response
+        bot_response = tokenizer.decode(output[0], skip_special_tokens=True)
+        print("AI Girlfriend:", bot_response)
+
+        # Speak the response
+        engine.say(bot_response)
         engine.runAndWait()
-
 
     except sr.UnknownValueError:
         print("Sorry, I didn't understand what you said.")

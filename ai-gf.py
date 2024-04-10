@@ -1,19 +1,23 @@
-import torch
-from transformers import GPT2Tokenizer, GPT2LMHeadModel
-import speech_recognition as sr
 import pyttsx3
+import speech_recognition as sr
+from chatbotAI import ChatbotAI
 
-# Load pre-trained model and tokenizer
-tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
-model = GPT2LMHeadModel.from_pretrained("Koriyy/DialoGPT-medium-gf")  # Replace with your fine-tuned model directory
+# Create a ChatbotAI instance
+chatbot = ChatbotAI()
 
-# Initialize SpeechRecognition recognizer
-recognizer = sr.Recognizer()
+print("AI Girlfriend: Hi! I'm your virtual girlfriend. How can I help you today?")
 
 # Initialize pyttsx3 engine
 engine = pyttsx3.init()
 
-print("AI Girlfriend: Hi! I'm your virtual girlfriend. How can I help you today?")
+# Set Zira voice explicitly
+voices = engine.getProperty('voices')
+for voice in voices:
+    if "Zira" in voice.name:
+        engine.setProperty('voice', voice.id)
+
+# Initialize SpeechRecognition recognizer
+recognizer = sr.Recognizer()
 
 # Chat loop
 while True:
@@ -27,19 +31,12 @@ while True:
         user_input = recognizer.recognize_google(audio)
         print("You:", user_input)
 
-        # Tokenize input
-        input_ids = tokenizer.encode(user_input, return_tensors="pt")
+        # Get response from ChatbotAI
+        response = chatbot.get_response(user_input)
+        print("AI Girlfriend:", response)
 
-        # Generate response
-        with torch.no_grad():
-            output = model.generate(input_ids, max_length=100, pad_token_id=tokenizer.eos_token_id, num_return_sequences=1)
-
-        # Decode response
-        bot_response = tokenizer.decode(output[0], skip_special_tokens=True)
-        print("AI Girlfriend:", bot_response)
-
-        # Speak the response
-        engine.say(bot_response)
+        # Convert text response to speech
+        engine.say(response)
         engine.runAndWait()
 
     except sr.UnknownValueError:

@@ -3,7 +3,7 @@ import speech_recognition as sr
 import requests
 import json
 
-engine = pyttsx3.init()
+engine = pyttsx3.init("espeak")
 
 engine.setProperty('voice', 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-US_ZIRA_11.0')
 

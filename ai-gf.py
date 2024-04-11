@@ -1,16 +1,37 @@
-import pyttsx3
+import subprocess
 import speech_recognition as sr
 import requests
 import json
 
-engine = pyttsx3.init()
-
-engine.setProperty('voice', 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-US_ZIRA_11.0')
-
 recognizer = sr.Recognizer()
 
-
 print("AI Girlfriend: Hi! I'm your virtual girlfriend. How can I help you today?")
+
+def text_to_speech(text, voice='default', speed=160, amplitude=100):
+    """
+    Convert text to speech using eSpeak.
+    
+    Parameters:
+        text (str): The text to be spoken.
+        voice (str): The voice to use for speech synthesis. Default is 'default'.
+        speed (int): The speed of speech in words per minute (default is 160).
+        amplitude (int): The amplitude of speech (default is 100).
+    
+    Returns:
+        None
+    """
+    # Build the eSpeak command
+    command = [
+        'espeak',
+        '-v', voice,
+        '-s', str(speed),
+        '-a', str(amplitude),
+        text
+    ]
+    
+    # Execute the command
+    subprocess.run(command)
+
 
 while True:
     # Listen for speech input
@@ -31,9 +52,8 @@ while True:
         response = data['content']
         print("AI Girlfriend:", response)
 
-        # Convert text response to speech
-        engine.say(response)
-        engine.runAndWait()
+        # Convert text response to speech using eSpeak
+        text_to_speech(response)
 
 
     except sr.UnknownValueError:

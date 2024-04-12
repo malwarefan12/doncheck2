@@ -1,9 +1,6 @@
 import subprocess
-import speech_recognition as sr
 import requests
 import json
-
-recognizer = sr.Recognizer()
 
 print("AI Girlfriend: Hi! I'm your virtual girlfriend. How can I help you today?")
 
@@ -34,16 +31,11 @@ def text_to_speech(text, voice='default', speed=160, amplitude=100):
 
 
 while True:
-    # Listen for speech input
-    with sr.Microphone() as source:
-        print("Listening...")
-        audio = recognizer.listen(source)
+    # Use Termux speech-to-text
+    user_input = subprocess.getoutput("termux-speech-to-text")
+    print("You:", user_input)
 
     try:
-        # Recognize speech input
-        user_input = recognizer.recognize_google(audio)
-        print("You:", user_input)
-
         # Get response from chatbot
         r = requests.get("""https://freeaiapi.vercel.app/api/ChitChat?query=""" + str(user_input))
         data = json.loads(r.text)
@@ -56,7 +48,5 @@ while True:
         text_to_speech(response)
 
 
-    except sr.UnknownValueError:
-        print("Sorry, I didn't understand what you said.")
-    except sr.RequestError:
-        print("Sorry, there was an error with the speech recognition service. Please try again.")
+    except Exception as e:
+        print("An error occurred:", str(e))

@@ -32,7 +32,7 @@ def text_to_speech(text, voice='default', speed=160, amplitude=100):
 
 while True:
     # Use Termux speech-to-text
-    user_input = subprocess.getoutput("termux-speech-to-text")
+    user_input = subprocess.getoutput("speech2text")
     print("You:", user_input)
 
     try:

@@ -32,12 +32,13 @@ def text_to_speech(text, voice='default', speed=160, amplitude=100):
 
 while True:
     # Use Termux speech-to-text
-    user_input = subprocess.getoutput("speech2text")
+    user_input = subprocess.getoutput("termux-speech-to-text")
     print("You:", user_input)
 
     try:
         # Get response from chatbot
         r = requests.get("""https://freeaiapi.vercel.app/api/ChitChat?query=""" + str(user_input))
+        print("Response from API:", r.text)  # Debugging statement
         data = json.loads(r.text)
 
         # Access the content
